@@ -1,7 +1,5 @@
 # AutoFurigana
 
-Developed by **TapSolve**.
-
 AutoFurigana adds furigana above Japanese kanji on web pages. It works fully
 offline, with no data collection or internet requests.
 
@@ -130,3 +128,5 @@ test/           automated tests (word lists, DOM behavior, privacy, i18n)
 - The readings come from a dictionary, so unusual names, slang, and deliberately
   playful readings can be wrong.
 - Websites that already include their own furigana are left exactly as they are.
+
+Developed by **TapSolve**.
