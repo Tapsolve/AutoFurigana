@@ -8,14 +8,12 @@ offline, with no data collection or internet requests.
 **Furigana** is the small Japanese text written above kanji to show how to read
 them. Japanese learners and anyone reading unfamiliar kanji use it constantly.
 
-## Example
-
-![Before and after enabling AutoFurigana](docs/images/autofurigana-example.png)
+![Before and after enabling AutoFurigana](docs/images/furigana_explanation.png)
 
 It is available for **Firefox** and **Chrome**. Both versions are built from the
 same code and behave the same.
 
-## What it does (in plain words)
+## What it does
 
 - Installs once, then every Japanese web page you visit gets reading
   annotations automatically.
@@ -32,18 +30,18 @@ same code and behave the same.
 - Has a light and a dark theme, following your browser/operating system or a
   fixed choice.
 
-### What it does NOT do
-
-- It never sends your data anywhere. No internet requests, no analytics, no
-  ads, nothing leaves your computer.
-- It never stores what you read. Everything is forgotten the moment you close
-  the page.
-- It doesn't change the page's design — it just adds small readings above the
+  ## 100% Offline 100% Local 100% Private
+  
+- It **never** sends your data anywhere. **No internet requests, no analytics, no
+  ads, nothing leaves your computer.**
+- It **never** stores what you read. **Everything is forgotten the moment you close
+  the page.**
+- It **doesn't** change the page's design — it just adds small readings above the
   kanji, using the page's own font style.
 
 ## Why it's private
 
-Everything runs on your own device:
+**Everything runs on your own device:**
 
 - The Japanese dictionary (~17 MB) is bundled *inside* the extension.
 - The reading engine runs inside your browser.
@@ -53,7 +51,7 @@ Everything runs on your own device:
 Nothing about the pages you visit is ever sent to a server. The extension does
 not even ask for internet access.
 
-## How it works (a quick tour)
+## How it works
 
 When a page loads, the extension quietly does this:
 
