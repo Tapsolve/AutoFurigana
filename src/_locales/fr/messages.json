@@ -75,6 +75,27 @@
         "message": "Confidentialité"
     },
     "optionsPrivacyBody": {
-        "message": "Le texte japonais est traité localement sur votre appareil et n'est jamais transmis par cette extension. Aucune requête réseau, aucune analyse, aucune télémétrie. Les lectures sont seulement mises en cache en mémoire."
+        "message": "Le texte japonais est traité localement sur votre appareil et n'est jamais transmis par cette extension. Aucune requête réseau, aucune analyse, aucune télémétrie. Les lectures sont seulement mises en cache en mémoire ; vos corrections de lecture sont enregistrées localement dans le stockage de l'extension, sur votre appareil."
+    },
+    "correctionAlternatives": {
+        "message": "Autres lectures"
+    },
+    "correctionWord": {
+        "message": "Mot"
+    },
+    "correctionCurrent": {
+        "message": "Actuel"
+    },
+    "correctionCustomPlaceholder": {
+        "message": "Saisir une lecture (hiragana)…"
+    },
+    "correctionApply": {
+        "message": "Appliquer"
+    },
+    "correctionReset": {
+        "message": "Utiliser la lecture du dictionnaire"
+    },
+    "optionsCorrection": {
+        "message": "Me permettre de corriger les lectures en cliquant sur le furigana"
     }
 }

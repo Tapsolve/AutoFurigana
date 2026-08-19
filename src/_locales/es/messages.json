@@ -75,6 +75,27 @@
         "message": "Privacidad"
     },
     "optionsPrivacyBody": {
-        "message": "El texto japonés se procesa localmente en tu dispositivo y esta extensión nunca lo transmite. Sin solicitudes de red, sin análisis, sin telemetría. Las lecturas solo se guardan en memoria."
+        "message": "El texto japonés se procesa localmente en tu dispositivo y esta extensión nunca lo transmite. Sin solicitudes de red, sin análisis, sin telemetría. Las lecturas solo se guardan en memoria; las correcciones de lectura que hagas se guardan localmente en el almacenamiento de la extensión, en tu dispositivo."
+    },
+    "correctionAlternatives": {
+        "message": "Otras lecturas"
+    },
+    "correctionWord": {
+        "message": "Palabra"
+    },
+    "correctionCurrent": {
+        "message": "Actual"
+    },
+    "correctionCustomPlaceholder": {
+        "message": "Escribe una lectura (hiragana)…"
+    },
+    "correctionApply": {
+        "message": "Aplicar"
+    },
+    "correctionReset": {
+        "message": "Usar lectura del diccionario"
+    },
+    "optionsCorrection": {
+        "message": "Permitir corregir lecturas al hacer clic en el furigana"
     }
 }

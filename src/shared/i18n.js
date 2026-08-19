@@ -112,8 +112,9 @@
     // Message lookup for `key` in the locale chosen for `pref`. Returns null
     // when unavailable so callers keep the embedded English HTML fallback.
     function get(key, pref) {
-        var loc = resolvedLocale(pref);
         var d = data();
+        if (!d) return null;
+        var loc = resolvedLocale(pref);
         if (d[loc] && d[loc][key] && typeof d[loc][key].message === "string") {
             return d[loc][key].message;
         }

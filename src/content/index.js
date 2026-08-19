@@ -22,6 +22,7 @@
     var analyzerMod = F.analyzer;
     var kuromojiMod = F.kuromojiAnalyzer;
     var furigana = F.furigana;
+    var correctionMod = F.correction;
 
     var CACHE_SIZE = 3000;
     var TEXT = 3;
@@ -79,6 +80,35 @@
             } else {
                 stop();
             }
+        }
+    }
+
+    // Storage change handler shared by every setting: reloads settings, then
+    // applies whatever the change requires (re-enable/disable, correction
+    // popup on/off, and re-rendering corrected words).
+    async function handleSettingsChange(changes) {
+        // Capture the previously loaded override map before reloading; the
+        // storage change payload may omit oldValue/newValue, so the in-memory
+        // value is the reliable "before" snapshot.
+        var prevOverrides = (state.settings && state.settings.overrides) || {};
+        var wasEnabled = state.enabledOnPage;
+        var s = await loadSettings();
+        if (state.enabledOnPage !== wasEnabled) {
+            if (state.enabledOnPage) {
+                start();
+            } else {
+                stop();
+            }
+        }
+        if (!state.running) return;
+        if (changes[settings.KEY_CORRECTION] && correctionMod && correctionMod.setEnabled) {
+            correctionMod.setEnabled(state.settings.correctionEnabled);
+        }
+        if (changes[settings.KEY_OVERRIDES]) {
+            var change = changes[settings.KEY_OVERRIDES];
+            var oldMap = (change && change.oldValue) || prevOverrides;
+            var newMap = (change && change.newValue) || state.settings.overrides || {};
+            reconcileOverrides(oldMap, newMap);
         }
     }
 
@@ -178,6 +208,11 @@
     // Cheap eligibility filter before anything expensive happens.
     function enqueue(node) {
         if (!state.running) return;
+        // Never touch our own injected UI (e.g. the correction popup).
+        if (renderer.isInsideIgnored(node)) {
+            state.processedNodes.add(node);
+            return;
+        }
         if (node.nodeType === TEXT) {
             var text = node.nodeValue;
             if (!kana.hasKanji(text)) {
@@ -212,6 +247,7 @@
 
     function acceptText(node) {
         if (state.processedNodes.has(node)) return false;
+        if (renderer.isInsideIgnored(node)) return false;
         if (renderer.isInsideAnyRuby(node)) return false;
         if (scannerMod.isInEditable(node)) return false;
         return true;
@@ -244,6 +280,10 @@
 
     function processTextNode(tn) {
         if (state.processedNodes.has(tn)) return;
+        if (renderer.isInsideIgnored(tn)) {
+            state.processedNodes.add(tn);
+            return;
+        }
         var original = tn.nodeValue;
         if (!kana.hasKanji(original)) {
             state.processedNodes.add(tn);
@@ -299,8 +339,10 @@
                 for (var j = 0; j < segs.length; j++) all.push(segs[j]);
             }
             if (state.analysisRun !== run || !node.isConnected || node.nodeValue !== job.original || !state.running) return;
+            var overrides = (state.settings && state.settings.overrides) || {};
+            var annotated = furigana.applyOverrides(all, overrides);
             var doc = node.ownerDocument || globalThis.document;
-            var frag = renderer.buildFragment(all, doc);
+            var frag = renderer.buildFragment(annotated, doc);
             node.replaceWith(frag);
         } catch (err) {
             // Never block the queue; the node stays un-annotated.
@@ -329,6 +371,67 @@
         return found;
     }
 
+    // Every root the extension annotates: the document plus every open shadow
+    // root reachable from it.
+    function pageRoots() {
+        var roots = [globalThis.document];
+        try {
+            var shadowRoots = collectShadowRoots(globalThis.document.documentElement);
+            roots.push.apply(roots, shadowRoots);
+        } catch (err) {
+            // ignore
+        }
+        return roots;
+    }
+
+    // Unwrap every our-ruby element in `nodes` (adjacent rubies forming one
+    // word) and re-analyse their combined text as a single text node. Needed
+    // for whole-word corrections: kuromoji re-splits the word (e.g. 一人 ->
+    // 一 + 人), then applyOverrides() splices it back with the correction.
+    function reprocessGroup(group) {
+        if (!group || !group.nodes || !group.nodes.length) return;
+        var parent = group.nodes[0].parentNode;
+        if (!parent) return;
+        var doc = group.nodes[0].ownerDocument || globalThis.document;
+        var text = doc.createTextNode(group.base);
+        parent.insertBefore(text, group.nodes[0]);
+        for (var i = 0; i < group.nodes.length; i++) parent.removeChild(group.nodes[i]);
+        state.processedNodes.delete(text);
+        enqueue(text);
+    }
+
+    // Unwrap + re-analyse every rendered ruby whose base changed in the
+    // override map, so live readings match saved corrections (or fall back to
+    // the dictionary default when a correction is removed).
+    function reconcileOverrides(oldMap, newMap) {
+        var all = {};
+        var base;
+        for (base in oldMap || {}) all[base] = true;
+        for (base in newMap || {}) all[base] = true;
+        var keys = Object.keys(all);
+        if (!keys.length) return;
+        var roots = pageRoots();
+        for (var k = 0; k < keys.length; k++) {
+            var key = keys[k];
+            for (var i = 0; i < roots.length; i++) {
+                var rubies = roots[i].querySelectorAll ? roots[i].querySelectorAll(renderer.RUBY_SELECTOR) : [];
+                for (var j = 0; j < rubies.length; j++) {
+                    var ruby = rubies[j];
+                    if (renderer.baseText(ruby) === key) {
+                        // The word renders as a single ruby token.
+                        reprocessRuby(ruby);
+                        continue;
+                    }
+                    var group = renderer.rubyGroup(ruby);
+                    if (group && group.base === key && group.nodes.length > 1) {
+                        // The word was split into several ruby tokens.
+                        reprocessGroup(group);
+                    }
+                }
+            }
+        }
+    }
+
     function start() {
         if (state.running) return;
         state.running = true;
@@ -349,6 +452,29 @@
         state.scanner = scannerMod.createScanner(globalThis.document, acceptText);
         state.scheduler = schedulerMod.createScheduler(processNode, { budgetMs: 4, idleTimeout: 250 });
 
+        if (correctionMod && correctionMod.start) {
+            correctionMod.start({
+                getTokenizer: function () {
+                    return state.analyzer ? state.analyzer.getTokenizer() : Promise.resolve(null);
+                },
+                getOverrides: function () {
+                    return (state.settings && state.settings.overrides) || {};
+                },
+                getLocale: function () {
+                    return state.settings ? state.settings.locale : "auto";
+                },
+                getEnabled: function () {
+                    return !state.settings || state.settings.correctionEnabled !== false;
+                },
+                setOverride: function (base, reading) {
+                    var overrides = Object.assign({}, (state.settings && state.settings.overrides) || {});
+                    if (reading) overrides[base] = reading;
+                    else delete overrides[base];
+                    return settings.set(settings.KEY_OVERRIDES, overrides);
+                }
+            });
+        }
+
         observeRoot(globalThis.document.documentElement);
         state.scheduler.enqueue(globalThis.document.documentElement);
     }
@@ -356,6 +482,8 @@
     function stop() {
         if (!state.running) return;
         state.running = false;
+
+        if (correctionMod && correctionMod.stop) correctionMod.stop();
 
         state.observers.forEach(function (obs) {
             try {
@@ -407,9 +535,11 @@
                     var relevant =
                         changes[settings.KEY_ENABLED] ||
                         changes[settings.KEY_EXCLUDED] ||
-                        changes[settings.KEY_SCALE];
+                        changes[settings.KEY_SCALE] ||
+                        changes[settings.KEY_OVERRIDES] ||
+                        changes[settings.KEY_CORRECTION];
                     if (!relevant) return;
-                    reloadSettings().catch(function (err) {
+                    handleSettingsChange(changes).catch(function (err) {
                         if (typeof console !== "undefined" && console.error) console.error(err);
                     });
                 });

@@ -288,6 +288,76 @@ async function run() {
         if (cache.size() !== 3) throw new Error("size should be 3");
     });
 
+    // Reading lookup + user corrections (feature: click-to-correct).
+    console.log("Reading lookup + corrections:");
+    await record("lookup candidates for 金玉 include きんたま", () =>
+        getTokenizer().then((tok) => {
+            const readings = F.furigana.lookupReadings(tok, "金玉");
+            if (!readings.includes("きんぎょく")) throw new Error(`missing きんぎょく: ${readings.join(" ")}`);
+            if (!readings.includes("きんたま")) throw new Error(`missing きんたま: ${readings.join(" ")}`);
+        })
+    );
+    await record("lookup candidates for 大人 include おとな and たいじん", () =>
+        getTokenizer().then((tok) => {
+            const readings = F.furigana.lookupReadings(tok, "大人");
+            if (!readings.includes("おとな")) throw new Error(`missing おとな: ${readings.join(" ")}`);
+            if (!readings.includes("たいじん")) throw new Error(`missing たいじん: ${readings.join(" ")}`);
+        })
+    );
+    await record("lookup is empty for an unknown surface", () =>
+        getTokenizer().then((tok) => {
+            const readings = F.furigana.lookupReadings(tok, "仮名文字なし");
+            if (!Array.isArray(readings) || readings.length !== 0) {
+                throw new Error(`expected no readings, got ${JSON.stringify(readings)}`);
+            }
+        })
+    );
+    await record("applyOverrides rewrites only matching ruby segments", () => {
+        const segments = [
+            { type: "ruby", base: "金玉", reading: "きんぎょく" },
+            { type: "text", text: "と" },
+            { type: "ruby", base: "大人", reading: "おとな" }
+        ];
+        const out = F.furigana.applyOverrides(segments, { 金玉: "きんたま" });
+        const first = out.find((s) => s.type === "ruby" && s.base === "金玉");
+        if (!first || first.reading !== "きんたま") throw new Error("override not applied");
+        const adult = out.find((s) => s.type === "ruby" && s.base === "大人");
+        if (!adult || adult.reading !== "おとな") throw new Error("unrelated ruby was rewritten");
+        // The cache must stay pure: the input segments are untouched.
+        if (segments[0].reading !== "きんぎょく") throw new Error("input segments were mutated");
+    });
+    await record("applyOverrides drops an empty-string correction", () => {
+        const out = F.furigana.applyOverrides([{ type: "ruby", base: "金玉", reading: "きんぎょく" }], { 金玉: "" });
+        if (out[0].reading !== "きんぎょく") throw new Error("empty correction should fall back to the dictionary");
+    });
+    await record("applyOverrides splices a whole-word correction across split rubies", () => {
+        // 一人 is tokenised by kuromoji as 一 + 人; the override key spans both.
+        const segments = [
+            { type: "ruby", base: "一", reading: "いち" },
+            { type: "ruby", base: "人", reading: "にん" },
+            { type: "text", text: "で" }
+        ];
+        const out = F.furigana.applyOverrides(segments, { 一人: "ひとり" });
+        if (out.length !== 2) throw new Error(`expected 2 segments, got ${out.length}: ${JSON.stringify(out)}`);
+        if (out[0].type !== "ruby" || out[0].base !== "一人" || out[0].reading !== "ひとり") {
+            throw new Error(`whole-word override not spliced: ${JSON.stringify(out)}`);
+        }
+        if (out[1].text !== "で") throw new Error(`trailing text lost: ${JSON.stringify(out)}`);
+        if (segments.length !== 3 || segments[0].base !== "一") throw new Error("input segments were mutated");
+    });
+    await record("whole-word override splices only at segment boundaries", () => {
+        // Key "食べ" ends mid-segment (inside the べる text node) so it must not
+        // splice even though its start aligns with a ruby boundary.
+        const segments = [
+            { type: "ruby", base: "食", reading: "た" },
+            { type: "text", text: "べる" }
+        ];
+        const out = F.furigana.applyOverrides(segments, { 食べ: "たべ" });
+        if (out.length !== 2) throw new Error(`non-boundary key must not be spliced: ${JSON.stringify(out)}`);
+        if (out[0].type !== "ruby" || out[0].base !== "食") throw new Error("segments must be untouched");
+        if (out[1].type !== "text" || out[1].text !== "べる") throw new Error("text must be untouched");
+    });
+
     console.log(`\nfurigana: ${count - failures}/${count} passed`);
     return failures === 0;
 }

@@ -22,6 +22,8 @@ const PACKAGE = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf
 
 const CONTENT_MODULE_ORDER = [
     "shared/browser-api.js",
+    "<locales>",
+    "shared/i18n.js",
     "japanese/kana.js",
     "japanese/cache.js",
     "japanese/analyzer.js",
@@ -33,6 +35,7 @@ const CONTENT_MODULE_ORDER = [
     "content/scanner.js",
     "content/observer.js",
     "content/shadow-dom.js",
+    "content/correction.js",
     "content/index.js"
 ];
 

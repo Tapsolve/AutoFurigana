@@ -4,10 +4,151 @@
 
 ruby[data-local-furigana="1"] {
     ruby-position: over;
+    cursor: pointer;
 }
 
 ruby[data-local-furigana="1"] > rt {
     font-size: var(--local-furigana-scale, 0.5em);
     user-select: none;
     -webkit-user-select: none;
+}
+
+/* Click-to-correct popup (own extension UI, never annotated). */
+.af-correction-popup {
+    position: fixed;
+    z-index: 2147483000;
+    box-sizing: border-box;
+    max-width: 280px;
+    min-width: 180px;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #1f2937;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+    padding: 8px;
+    text-align: left;
+}
+
+.af-correction-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 2px 2px 6px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    margin-bottom: 6px;
+}
+
+.af-correction-base {
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.af-correction-reading {
+    font-size: 12px;
+    color: #6b7280;
+    white-space: nowrap;
+}
+
+.af-correction-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.af-correction-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #6b7280;
+    margin: 4px 2px 2px;
+}
+
+.af-correction-item,
+.af-correction-apply,
+.af-correction-reset {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 6px 8px;
+    cursor: pointer;
+}
+
+.af-correction-item:hover,
+.af-correction-apply:hover,
+.af-correction-reset:hover {
+    background: rgba(59, 130, 246, 0.08);
+}
+
+.af-correction-item.af-correction-current {
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.35);
+}
+
+.af-correction-empty {
+    padding: 6px 8px;
+    color: #9ca3af;
+}
+
+.af-correction-custom {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    padding-top: 8px;
+}
+
+.af-correction-input {
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+    font: inherit;
+    color: inherit;
+    background: #f9fafb;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    padding: 6px 8px;
+}
+
+.af-correction-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: #ffffff;
+}
+
+.af-correction-apply {
+    flex: 0 0 auto;
+    width: auto;
+    text-align: center;
+    background: #3b82f6;
+    color: #ffffff;
+    border-color: #3b82f6;
+}
+
+.af-correction-apply:hover {
+    background: #2563eb;
+}
+
+.af-correction-reset {
+    margin-top: 6px;
+    color: #dc2626;
+}
+
+.af-correction-reset:hover {
+    background: rgba(220, 38, 38, 0.08);
 }

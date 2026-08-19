@@ -22,6 +22,10 @@ same code and behave the same.
   understands whole sentences, not just single characters.
 - Lets you turn it on/off, disable it for a specific site, and choose the
   furigana size (0.1x to 2x).
+- When the automatic reading is wrong, click the furigana to pick another
+  reading for that word (e.g. 金玉 きんぎょく → きんたま, or 一人 when the
+  splitter renders it 一・人 instead of ひとり) or type your own.
+  Corrections are remembered per word, on every page.
 - Speaks your language. The extension interface follows the browser's UI
   language by default, or you can pick a fixed language (English, French,
   Chinese, Japanese, Portuguese, Spanish, Dutch) in one click.
@@ -57,14 +61,18 @@ When a page loads, the extension quietly does this:
 2. **Understands** each sentence with a Japanese word-splitting engine
    (kuromoji + the IPADIC dictionary). It figures out where words begin and
    end, like a dictionary that knows grammar.
-3. **Picks a reading** for each kanji based on the surrounding words — 一人 is
-   read ひとり, 一日 is いちにち, and so on.
+3. **Picks a reading** for each kanji based on the surrounding words — 今日 is
+   read きょう and 日本 as にほん and 食べる as たべる, not a
+   character-by-character guess.
 4. **Places the reading** as native `<ruby>` text directly above each kanji,
    using the same small-annotation style Japanese books and news sites use.
 5. **Keeps watching.** If a site adds new text (scrolling feeds, chat, search
    results), the new text gets annotated too.
 6. **Skips** text you're typing into, and never touches furigana a website
    already provides.
+7. **Lets you fix mistakes.** Click any furigana to correct the reading — you
+   get every reading the dictionary knows for that word, or you can type one.
+   The correction is applied to that word everywhere it appears.
 
 To make sure it feels instant, the extension does all of this in small chunks
 so scrolling stays smooth, and it remembers what it already read so it doesn't
@@ -119,14 +127,15 @@ test/           automated tests (word lists, DOM behavior, privacy, i18n)
 - **Toolbar popup**: master on/off switch, on/off for the current site only,
   the furigana size slider, the interface language, and the theme.
 - **Options page**: the same controls plus a language/theme picker, a list of
-  sites you've disabled, and a preview.
+  sites you've disabled, a preview, and a toggle for the click-to-correct
+  feature.
 
 ## Known limits
 
 - Kanji inside images, videos, games, and the browser's own interface can't be
   annotated.
 - The readings come from a dictionary, so unusual names, slang, and deliberately
-  playful readings can be wrong.
+  playful readings can be wrong. Click the furigana to correct any word.
 - Websites that already include their own furigana are left exactly as they are.
 
 Developed by **TapSolve**.

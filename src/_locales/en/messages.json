@@ -75,6 +75,27 @@
         "message": "Privacy"
     },
     "optionsPrivacyBody": {
-        "message": "Japanese text is processed locally on your device and is never transmitted by this extension. No network requests, no analytics, no telemetry. Readings are cached in memory only."
+        "message": "Japanese text is processed locally on your device and is never transmitted by this extension. No network requests, no analytics, no telemetry. Readings are cached in memory only; any reading corrections you make are stored locally in this extension's own storage on your device."
+    },
+    "correctionAlternatives": {
+        "message": "Alternative readings"
+    },
+    "correctionWord": {
+        "message": "Word"
+    },
+    "correctionCurrent": {
+        "message": "Current"
+    },
+    "correctionCustomPlaceholder": {
+        "message": "Type a reading (hiragana)…"
+    },
+    "correctionApply": {
+        "message": "Apply"
+    },
+    "correctionReset": {
+        "message": "Use dictionary reading"
+    },
+    "optionsCorrection": {
+        "message": "Let me correct readings by clicking the furigana"
     }
 }

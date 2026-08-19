@@ -75,6 +75,27 @@
         "message": "プライバシー"
     },
     "optionsPrivacyBody": {
-        "message": "日本語テキストはお使いの端末上でローカルに処理され、この拡張機能から送信されることは一切ありません。ネットワーク要求・分析・テレメトリーはありません。読みはメモリ内にのみキャッシュされます。"
+        "message": "日本語テキストはお使いの端末上でローカルに処理され、この拡張機能から送信されることは一切ありません。ネットワーク要求・分析・テレメトリーはありません。読みはメモリ内にのみキャッシュされます。手動で修正した読みは、お使いの端末上の拡張機能ストレージにローカルに保存されます。"
+    },
+    "correctionAlternatives": {
+        "message": "他の読み方"
+    },
+    "correctionWord": {
+        "message": "単語"
+    },
+    "correctionCurrent": {
+        "message": "現在"
+    },
+    "correctionCustomPlaceholder": {
+        "message": "読み（ひらがな）を入力…"
+    },
+    "correctionApply": {
+        "message": "適用"
+    },
+    "correctionReset": {
+        "message": "辞書の読みに戻す"
+    },
+    "optionsCorrection": {
+        "message": "ふりがなをクリックして読みを修正できるようにする"
     }
 }

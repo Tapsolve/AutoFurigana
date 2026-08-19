@@ -75,6 +75,27 @@
         "message": "Privacy"
     },
     "optionsPrivacyBody": {
-        "message": "Japanse tekst wordt lokaal op uw apparaat verwerkt en wordt nooit door deze extensie verzonden. Geen netwerkverzoeken, geen analyses, geen telemetrie. Lezingen worden alleen in het geheugen in de cache opgeslagen."
+        "message": "Japanse tekst wordt lokaal op uw apparaat verwerkt en wordt nooit door deze extensie verzonden. Geen netwerkverzoeken, geen analyses, geen telemetrie. Lezingen worden alleen in het geheugen in de cache opgeslagen; uitspraakcorrecties die u maakt, worden lokaal opgeslagen in de opslag van de extensie op uw apparaat."
+    },
+    "correctionAlternatives": {
+        "message": "Andere uitspraken"
+    },
+    "correctionWord": {
+        "message": "Woord"
+    },
+    "correctionCurrent": {
+        "message": "Huidig"
+    },
+    "correctionCustomPlaceholder": {
+        "message": "Typ een uitspraak (hiragana)…"
+    },
+    "correctionApply": {
+        "message": "Toepassen"
+    },
+    "correctionReset": {
+        "message": "Woordenboekuitspraak gebruiken"
+    },
+    "optionsCorrection": {
+        "message": "Sta toe dat ik uitspraken corrigeer door op furigana te klikken"
     }
 }

@@ -76,9 +76,11 @@ async function runScenario(html, options, scenarioFn) {
 
     // Set the extension API mock BEFORE loading modules (resolved lazily,
     // but set early to mirror the real environment).
+    const storageMock = createStorageMock(opts.settings || {});
     globalThis.browser = {
         storage: {
-            local: createStorageMock(opts.settings || {})
+            local: storageMock,
+            onChanged: storageMock.onChanged
         },
         runtime: {
             getURL: function (p) {
@@ -103,6 +105,8 @@ async function runScenario(html, options, scenarioFn) {
             "content/scanner.js",
             "content/observer.js",
             "content/shadow-dom.js",
+            "shared/i18n.js",
+            "content/correction.js",
             "content/index.js"
         ],
         globalThis.__FURIGANA__
@@ -151,6 +155,19 @@ function plainText(doc, root) {
 function countRuby(doc, root) {
     const el = root || doc.body;
     return el.querySelectorAll('ruby[data-local-furigana="1"]').length;
+}
+
+function findRubyByBase(root, base) {
+    const list = root.querySelectorAll('ruby[data-local-furigana="1"]');
+    for (const ruby of list) {
+        let b = "";
+        for (const child of ruby.childNodes) {
+            if (child.nodeType === 1 && (child.tagName === "RT" || child.tagName === "RP")) continue;
+            b += child.textContent;
+        }
+        if (b === base) return ruby;
+    }
+    return null;
 }
 
 async function run() {
@@ -331,6 +348,159 @@ async function run() {
             }
         });
     });
+
+    // --- Saved reading overrides are applied when text is rendered ---
+    await record("saved reading override is rendered", () =>
+        runScenario(
+            "<p>金玉を買った。</p>",
+            { settings: { "furigana:overrides": { 金玉: "きんたま" } } },
+            async (F, doc) => {
+                await waitFor(() => {
+                    const ruby = findRubyByBase(doc.body, "金玉");
+                    return ruby && ruby.querySelector("rt").textContent === "きんたま";
+                });
+                if (plainText(doc) !== "金玉を買った。") {
+                    throw new Error(`plain text corrupted: "${plainText(doc)}"`);
+                }
+            }
+        )
+    );
+
+    // --- Removing an override reverts rendered text to the dictionary reading ---
+    await record("removing an override reverts to the dictionary reading", () =>
+        runScenario(
+            "<p>金玉を買った。</p>",
+            { settings: { "furigana:overrides": { 金玉: "きんたま" } } },
+            async (F, doc) => {
+                await waitFor(() => {
+                    const ruby = findRubyByBase(doc.body, "金玉");
+                    return ruby && ruby.querySelector("rt").textContent === "きんたま";
+                });
+                await F.settings.set(F.settings.KEY_OVERRIDES, {});
+                await waitFor(() => {
+                    const ruby = findRubyByBase(doc.body, "金玉");
+                    return ruby && ruby.querySelector("rt").textContent === "きんぎょく";
+                });
+            }
+        )
+    );
+
+    // --- Click-to-correct end to end ---
+    await record("clicking a ruby offers alternatives and saves a correction", () =>
+        runScenario("<p>金玉を買った。</p>", {}, async (F, doc) => {
+            await waitFor(() => !!findRubyByBase(doc.body, "金玉"));
+            const ruby = findRubyByBase(doc.body, "金玉");
+
+            ruby.dispatchEvent(new doc.defaultView.MouseEvent("click", { bubbles: true, cancelable: true, composed: true }));
+            await waitFor(() => !!doc.querySelector(".af-correction-popup"));
+
+            const popup = doc.querySelector(".af-correction-popup");
+            if (!popup) throw new Error("correction popup did not open");
+
+            // Our own popup UI must never be annotated itself.
+            if (popup.querySelector("ruby")) throw new Error("correction popup got annotated");
+
+            await waitFor(() =>
+                [...popup.querySelectorAll("button")].some((b) => b.textContent.trim() === "きんたま")
+            );
+            const alternative = [...popup.querySelectorAll("button")].find((b) => b.textContent.trim() === "きんたま");
+            alternative.dispatchEvent(new doc.defaultView.MouseEvent("click", { bubbles: true, cancelable: true, composed: true }));
+
+            await waitFor(() => {
+                const rubyAfter = findRubyByBase(doc.body, "金玉");
+                return rubyAfter && rubyAfter.querySelector("rt").textContent === "きんたま";
+            });
+            if (doc.querySelector(".af-correction-popup")) throw new Error("popup did not close after applying");
+
+            const s = await F.settings.load();
+            if (!s.overrides || s.overrides["金玉"] !== "きんたま") {
+                throw new Error(`override not persisted: ${JSON.stringify(s.overrides)}`);
+            }
+            if (plainText(doc) !== "金玉を買った。") {
+                throw new Error(`plain text corrupted: "${plainText(doc)}"`);
+            }
+        })
+    );
+
+    // --- Manual custom reading via the popup input ---
+    await record("a typing a custom reading is saved and applied", () =>
+        runScenario("<p>金玉を買った。</p>", {}, async (F, doc) => {
+            await waitFor(() => !!findRubyByBase(doc.body, "金玉"));
+            findRubyByBase(doc.body, "金玉").dispatchEvent(
+                new doc.defaultView.MouseEvent("click", { bubbles: true, cancelable: true, composed: true })
+            );
+            await waitFor(() => !!doc.querySelector(".af-correction-popup"));
+            const input = doc.querySelector(".af-correction-input");
+            input.value = "きんたま";
+            doc.querySelector(".af-correction-apply").dispatchEvent(
+                new doc.defaultView.MouseEvent("click", { bubbles: true, cancelable: true, composed: true })
+            );
+            await waitFor(() => {
+                const rubyAfter = findRubyByBase(doc.body, "金玉");
+                return rubyAfter && rubyAfter.querySelector("rt").textContent === "きんたま";
+            });
+        })
+    );
+
+    // --- Correction disabled: clicking does nothing ---
+    await record("correction popup is suppressed when disabled", () =>
+        runScenario("<p>金玉を買った。</p>", { settings: { "furigana:correctionEnabled": false } }, async (F, doc) => {
+            await waitFor(() => !!findRubyByBase(doc.body, "金玉"));
+            findRubyByBase(doc.body, "金玉").dispatchEvent(
+                new doc.defaultView.MouseEvent("click", { bubbles: true, cancelable: true, composed: true })
+            );
+            await new Promise((resolve) => setTimeout(resolve, 100));
+            if (doc.querySelector(".af-correction-popup")) throw new Error("popup opened while corrections are disabled");
+        })
+    );
+
+    // --- A whole-word correction splices split rubies back together ---
+    await record("a saved whole-word override is applied across split rubies", () =>
+        runScenario(
+            "<p>一人で。</p>",
+            { settings: { "furigana:overrides": { 一人: "ひとり" } } },
+            async (F, doc) => {
+                await waitFor(() => {
+                    const ruby = findRubyByBase(doc.body, "一人");
+                    return ruby && ruby.querySelector("rt").textContent === "ひとり";
+                });
+                if (findRubyByBase(doc.body, "一")) throw new Error("split ruby 一 should no longer exist");
+                if (plainText(doc) !== "一人で。") throw new Error(`plain text corrupted: "${plainText(doc)}"`);
+            }
+        )
+    );
+
+    // --- Clicking one kanji of a split word offers the whole-word reading ---
+    await record("clicking a split word offers and applies the whole-word reading", () =>
+        runScenario("<p>一人で。</p>", {}, async (F, doc) => {
+            await waitFor(() => !!findRubyByBase(doc.body, "一") && !!findRubyByBase(doc.body, "人"));
+            findRubyByBase(doc.body, "一").dispatchEvent(
+                new doc.defaultView.MouseEvent("click", { bubbles: true, cancelable: true, composed: true })
+            );
+            await waitFor(() => !!doc.querySelector(".af-correction-popup"));
+
+            const popup = doc.querySelector(".af-correction-popup");
+            await waitFor(() =>
+                [...popup.querySelectorAll(".af-correction-word-item")].some((b) => b.textContent.trim() === "ひとり")
+            );
+            const wordButton = [...popup.querySelectorAll(".af-correction-word-item")].find(
+                (b) => b.textContent.trim() === "ひとり"
+            );
+            wordButton.dispatchEvent(new doc.defaultView.MouseEvent("click", { bubbles: true, cancelable: true, composed: true }));
+
+            await waitFor(() => {
+                const ruby = findRubyByBase(doc.body, "一人");
+                return ruby && ruby.querySelector("rt").textContent === "ひとり";
+            });
+            if (doc.querySelector(".af-correction-popup")) throw new Error("popup did not close after applying");
+            if (findRubyByBase(doc.body, "一")) throw new Error("split ruby 一 should no longer exist");
+            const s = await F.settings.load();
+            if (!s.overrides || s.overrides["一人"] !== "ひとり") {
+                throw new Error(`whole-word override not persisted: ${JSON.stringify(s.overrides)}`);
+            }
+            if (plainText(doc) !== "一人で。") throw new Error(`plain text corrupted: "${plainText(doc)}"`);
+        })
+    );
 
     console.log(`\ndom: ${count - failures}/${count} passed`);
     return failures === 0;

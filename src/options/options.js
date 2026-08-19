@@ -6,6 +6,7 @@
     F.i18n.apply(document);
 
     var enabledEl = document.getElementById("enabled");
+    var correctionEl = document.getElementById("correction");
     var scaleEl = document.getElementById("scale");
     var scaleValueEl = document.getElementById("scaleValue");
     var previewEl = document.getElementById("preview");
@@ -87,6 +88,7 @@
     async function render() {
         var s = await S.load();
         enabledEl.checked = !!s.enabled;
+        if (correctionEl) correctionEl.checked = !!s.correctionEnabled;
         scaleEl.value = String(s.scale);
         updateScalePreview(s.scale);
         renderHosts(s.excludedHosts);
@@ -97,6 +99,10 @@
 
     function setEnabled(value) {
         return S.set(S.KEY_ENABLED, !!value);
+    }
+
+    function setCorrection(value) {
+        return S.set(S.KEY_CORRECTION, !!value);
     }
 
     function setScale(value) {
@@ -134,6 +140,12 @@
         setEnabled(enabledEl.checked);
     });
 
+    if (correctionEl) {
+        correctionEl.addEventListener("change", function () {
+            setCorrection(correctionEl.checked);
+        });
+    }
+
     scaleEl.addEventListener("input", function () {
         updateScalePreview(scaleEl.value);
         setScale(scaleEl.value);
@@ -162,7 +174,7 @@
     });
 
     F.onStorageChanged(function (changes) {
-        if (changes[S.KEY_LOCALE] || changes[S.KEY_THEME]) render();
+        if (changes[S.KEY_LOCALE] || changes[S.KEY_THEME] || changes[S.KEY_CORRECTION]) render();
     });
 
     watchTheme();

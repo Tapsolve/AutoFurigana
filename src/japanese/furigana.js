@@ -130,6 +130,111 @@
         return tokensToSegments(tokens);
     }
 
+    // All hiragana readings the bundled IPADIC dictionary lists for an exact
+    // surface form. Kuromoji's tokenizer only reports the single reading chosen
+    // by its Viterbi path, but the underlying token-info dictionary (keyed by
+    // the same double-array trie) holds every reading entry for that surface
+    // (e.g. 金玉 -> きんぎょく / きんたま, 上手 -> many). Used to offer the user
+    // a choice when the default reading is wrong.
+    function lookupReadings(tokenizer, surface) {
+        if (!tokenizer || !surface) return [];
+        var viterbi = tokenizer.viterbi_builder;
+        var trie = viterbi && viterbi.trie;
+        var tdict = tokenizer.token_info_dictionary;
+        if (!trie || !tdict || typeof trie.commonPrefixSearch !== "function") return [];
+
+        var seen = {};
+        var list = [];
+        var entries = trie.commonPrefixSearch(surface);
+        for (var i = 0; i < entries.length; i++) {
+            if (entries[i].k !== surface) continue;
+            var ids = tdict.target_map[entries[i].v] || [];
+            for (var j = 0; j < ids.length; j++) {
+                var features = tdict.getFeatures(parseInt(ids[j])).split(",");
+                var reading = features[8];
+                if (!reading) continue;
+                var hira = kana.toHiragana(reading);
+                if (!seen[hira]) {
+                    seen[hira] = true;
+                    list.push(hira);
+                }
+            }
+        }
+        return list;
+    }
+
+    // Rewrite ruby readings whose base has a user correction in the override
+    // map (base -> reading). Returns new segment objects so the analysis cache
+    // (which stores uncorrected dictionary readings) is never polluted.
+    //
+    // Two kinds of correction are supported:
+    //   * per-base: the override key is exactly one ruby base (金玉 -> きんたま)
+    //   * whole-word: kuromoji may split a word into several single-kanji ruby
+    //     segments (一人 -> 一 + 人); the override key spans them and replaces
+    //     the whole span with one ruby (一人 -> ひとり).
+    function applyOverrides(segments, overrides) {
+        if (!overrides || !segments) return segments;
+
+        var used = {};
+        var out = [];
+        for (var i = 0; i < segments.length; i++) {
+            var seg = segments[i];
+            if (seg.type === "ruby" && overrides[seg.base] != null && overrides[seg.base] !== "") {
+                out.push({ type: "ruby", base: seg.base, reading: overrides[seg.base] });
+                used[seg.base] = true;
+            } else {
+                out.push(seg);
+            }
+        }
+
+        // Whole-word keys are everything left over that wasn't used as a plain
+        // per-base correction.
+        var keys = [];
+        for (var key in overrides) {
+            if (overrides[key] != null && overrides[key] !== "" && !used[key]) keys.push(key);
+        }
+        if (!keys.length) return out;
+
+        // Segment boundaries over the reconstructed plain surface. Keys only
+        // splice when they start AND end exactly on a segment boundary.
+        var plain = "";
+        var bounds = [0];
+        for (var j = 0; j < out.length; j++) {
+            var piece = out[j].type === "ruby" ? out[j].base : out[j].text;
+            plain += piece;
+            bounds.push(plain.length);
+        }
+
+        var result = [];
+        var cursor = 0;
+        while (cursor < out.length) {
+            var start = bounds[cursor];
+            var matched = null;
+            var matchedIdx = -1;
+            for (var k = 0; k < keys.length; k++) {
+                var candidate = keys[k];
+                if (plain.indexOf(candidate, start) === start) {
+                    var end = start + candidate.length;
+                    if (bounds.indexOf(end) !== -1) {
+                        matched = candidate;
+                        matchedIdx = k;
+                        break;
+                    }
+                }
+            }
+            if (matched) {
+                result.push({ type: "ruby", base: matched, reading: overrides[matched] });
+                var consumed = start + matched.length;
+                while (cursor < out.length && bounds[cursor + 1] <= consumed) cursor++;
+                keys.splice(matchedIdx, 1);
+            } else {
+                result.push(out[cursor]);
+                cursor++;
+            }
+        }
+        return result;
+    }
+
     // Chunk large text near Japanese punctuation/newlines.
     var CHUNK_BOUNDARY = new Set(["。", "！", "？", "…", "\n", "」", "、", "．"]);
 
@@ -163,6 +268,8 @@
         tokensToSegments: tokensToSegments,
         mergeSegments: mergeSegments,
         convert: convert,
-        splitChunks: splitChunks
+        splitChunks: splitChunks,
+        lookupReadings: lookupReadings,
+        applyOverrides: applyOverrides
     };
 })(globalThis.__FURIGANA__);

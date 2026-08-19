@@ -75,6 +75,27 @@
         "message": "隐私"
     },
     "optionsPrivacyBody": {
-        "message": "日语文本在您的设备上本地处理，本扩展程序绝不传输任何内容。无网络请求、无分析、无遥测。读音仅在内存中缓存。"
+        "message": "日语文本在您的设备上本地处理，本扩展程序绝不传输任何内容。无网络请求、无分析、无遥测。读音仅在内存中缓存；您手动修正的读音会保存在本扩展程序在您设备上的本地存储中。"
+    },
+    "correctionAlternatives": {
+        "message": "其他读音"
+    },
+    "correctionWord": {
+        "message": "词语"
+    },
+    "correctionCurrent": {
+        "message": "当前"
+    },
+    "correctionCustomPlaceholder": {
+        "message": "输入读音（平假名）…"
+    },
+    "correctionApply": {
+        "message": "应用"
+    },
+    "correctionReset": {
+        "message": "使用词典读音"
+    },
+    "optionsCorrection": {
+        "message": "允许我通过点击振假名来修正读音"
     }
 }
