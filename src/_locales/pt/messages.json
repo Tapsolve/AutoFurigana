@@ -1,0 +1,80 @@
+{
+    "extensionName": {
+        "message": "AutoFurigana"
+    },
+    "extensionDescription": {
+        "message": "Adiciona furigana acima dos kanji japoneses em páginas da web. Funciona totalmente offline, sem coleta de dados nem solicitações à internet."
+    },
+    "popupEnabled": {
+        "message": "Ativado"
+    },
+    "popupSiteEnabled": {
+        "message": "Ativado neste site"
+    },
+    "popupSize": {
+        "message": "Tamanho"
+    },
+    "popupSiteHint": {
+        "message": "Esta página não é um site comum."
+    },
+    "popupOpenOptions": {
+        "message": "Opções avançadas…"
+    },
+    "optionsTitle": {
+        "message": "Opções do AutoFurigana"
+    },
+    "optionsTagline": {
+        "message": "Furigana japonês totalmente offline para páginas da web."
+    },
+    "optionsGeneral": {
+        "message": "Geral"
+    },
+    "optionsEnable": {
+        "message": "Ativar a extensão"
+    },
+    "optionsFuriganaSize": {
+        "message": "Tamanho do furigana"
+    },
+    "optionsLanguage": {
+        "message": "Idioma"
+    },
+    "optionsLanguageHint": {
+        "message": "Escolha o idioma da interface da extensão. Automático segue o idioma do seu navegador."
+    },
+    "optionsTheme": {
+        "message": "Tema"
+    },
+    "optionsThemeHint": {
+        "message": "Modo escuro para a interface da extensão. Automático segue o seu navegador ou sistema operacional."
+    },
+    "localeAuto": {
+        "message": "Automático (navegador)"
+    },
+    "themeAuto": {
+        "message": "Automático"
+    },
+    "themeLight": {
+        "message": "Claro"
+    },
+    "themeDark": {
+        "message": "Escuro"
+    },
+    "optionsExcludedSites": {
+        "message": "Sites excluídos"
+    },
+    "optionsExcludedHint": {
+        "message": "O furigana não é adicionado nesses sites. Somente nomes de host, por exemplo example.com."
+    },
+    "optionsAdd": {
+        "message": "Adicionar"
+    },
+    "optionsNoExclusions": {
+        "message": "Nenhuma exclusão ainda."
+    },
+    "optionsPrivacy": {
+        "message": "Privacidade"
+    },
+    "optionsPrivacyBody": {
+        "message": "O texto japonês é processado localmente no seu dispositivo e nunca é transmitido por esta extensão. Sem solicitações de rede, sem análises, sem telemetria. As leituras são armazenadas em cache apenas na memória."
+    }
+}

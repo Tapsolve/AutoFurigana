@@ -1,0 +1,80 @@
+{
+    "extensionName": {
+        "message": "AutoFurigana"
+    },
+    "extensionDescription": {
+        "message": "Voegt furigana toe boven Japanse kanji op webpagina's. Werkt volledig offline, zonder gegevensverzameling of internetverzoeken."
+    },
+    "popupEnabled": {
+        "message": "Ingeschakeld"
+    },
+    "popupSiteEnabled": {
+        "message": "Ingeschakeld op deze site"
+    },
+    "popupSize": {
+        "message": "Grootte"
+    },
+    "popupSiteHint": {
+        "message": "Deze pagina is geen normale website."
+    },
+    "popupOpenOptions": {
+        "message": "Geavanceerde opties…"
+    },
+    "optionsTitle": {
+        "message": "AutoFurigana-opties"
+    },
+    "optionsTagline": {
+        "message": "Volledig offline Japanse furigana voor webpagina's."
+    },
+    "optionsGeneral": {
+        "message": "Algemeen"
+    },
+    "optionsEnable": {
+        "message": "Extensie inschakelen"
+    },
+    "optionsFuriganaSize": {
+        "message": "Grootte van furigana"
+    },
+    "optionsLanguage": {
+        "message": "Taal"
+    },
+    "optionsLanguageHint": {
+        "message": "Kies de taal van de interface van de extensie. Automatisch volgt de taal van uw browser."
+    },
+    "optionsTheme": {
+        "message": "Thema"
+    },
+    "optionsThemeHint": {
+        "message": "Donkere modus voor de interface van de extensie. Automatisch volgt uw browser of besturingssysteem."
+    },
+    "localeAuto": {
+        "message": "Automatisch (browser)"
+    },
+    "themeAuto": {
+        "message": "Automatisch"
+    },
+    "themeLight": {
+        "message": "Licht"
+    },
+    "themeDark": {
+        "message": "Donker"
+    },
+    "optionsExcludedSites": {
+        "message": "Uitgesloten sites"
+    },
+    "optionsExcludedHint": {
+        "message": "Op deze sites wordt geen furigana toegevoegd. Alleen hostnamen, bijv. example.com."
+    },
+    "optionsAdd": {
+        "message": "Toevoegen"
+    },
+    "optionsNoExclusions": {
+        "message": "Nog geen uitsluitingen."
+    },
+    "optionsPrivacy": {
+        "message": "Privacy"
+    },
+    "optionsPrivacyBody": {
+        "message": "Japanse tekst wordt lokaal op uw apparaat verwerkt en wordt nooit door deze extensie verzonden. Geen netwerkverzoeken, geen analyses, geen telemetrie. Lezingen worden alleen in het geheugen in de cache opgeslagen."
+    }
+}

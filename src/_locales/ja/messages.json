@@ -1,0 +1,80 @@
+{
+    "extensionName": {
+        "message": "AutoFurigana"
+    },
+    "extensionDescription": {
+        "message": "ウェブページの日本語の漢字にふりがなを追加します。完全にオフラインで動作し、データ収集やインターネット通信は行いません。"
+    },
+    "popupEnabled": {
+        "message": "有効"
+    },
+    "popupSiteEnabled": {
+        "message": "このサイトで有効"
+    },
+    "popupSize": {
+        "message": "サイズ"
+    },
+    "popupSiteHint": {
+        "message": "このページは通常のウェブサイトではありません。"
+    },
+    "popupOpenOptions": {
+        "message": "詳細設定…"
+    },
+    "optionsTitle": {
+        "message": "AutoFurigana 設定"
+    },
+    "optionsTagline": {
+        "message": "ウェブページ向けの完全オフライン日本語ふりがな。"
+    },
+    "optionsGeneral": {
+        "message": "一般"
+    },
+    "optionsEnable": {
+        "message": "拡張機能を有効にする"
+    },
+    "optionsFuriganaSize": {
+        "message": "ふりがなのサイズ"
+    },
+    "optionsLanguage": {
+        "message": "言語"
+    },
+    "optionsLanguageHint": {
+        "message": "拡張機能の表示言語を選択します。自動の場合はブラウザーの言語に従います。"
+    },
+    "optionsTheme": {
+        "message": "テーマ"
+    },
+    "optionsThemeHint": {
+        "message": "拡張機能のインターフェースのダークモード。自動の場合はブラウザーまたはOSに従います。"
+    },
+    "localeAuto": {
+        "message": "自動（ブラウザー）"
+    },
+    "themeAuto": {
+        "message": "自動"
+    },
+    "themeLight": {
+        "message": "ライト"
+    },
+    "themeDark": {
+        "message": "ダーク"
+    },
+    "optionsExcludedSites": {
+        "message": "除外サイト"
+    },
+    "optionsExcludedHint": {
+        "message": "これらのサイトではふりがなを付けません。ホスト名のみ、例: example.com"
+    },
+    "optionsAdd": {
+        "message": "追加"
+    },
+    "optionsNoExclusions": {
+        "message": "まだ除外はありません。"
+    },
+    "optionsPrivacy": {
+        "message": "プライバシー"
+    },
+    "optionsPrivacyBody": {
+        "message": "日本語テキストはお使いの端末上でローカルに処理され、この拡張機能から送信されることは一切ありません。ネットワーク要求・分析・テレメトリーはありません。読みはメモリ内にのみキャッシュされます。"
+    }
+}

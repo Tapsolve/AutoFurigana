@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AutoFurigana</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="popup">
+        <h1>AutoFurigana</h1>
+
+        <label class="row">
+            <span data-i18n="popupEnabled">Enabled</span>
+            <input type="checkbox" id="enabled" checked>
+        </label>
+
+        <label class="row" id="siteRow">
+            <span id="siteLabel" data-i18n="popupSiteEnabled">Enabled on this site</span>
+            <input type="checkbox" id="siteEnabled" checked>
+        </label>
+
+        <div class="row">
+            <span data-i18n="popupSize">Size</span>
+            <input type="range" id="scale" min="0.1" max="2" step="0.05">
+            <output id="scaleValue"></output>
+        </div>
+
+        <label class="row">
+            <span data-i18n="optionsLanguage">Language</span>
+            <select id="locale">
+                <option value="auto" data-i18n="localeAuto">Automatic (browser)</option>
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+                <option value="zh_CN">中文（简体）</option>
+                <option value="ja">日本語</option>
+                <option value="pt">Português</option>
+                <option value="es">Español</option>
+                <option value="nl">Nederlands</option>
+            </select>
+        </label>
+
+        <label class="row">
+            <span data-i18n="optionsTheme">Theme</span>
+            <select id="theme">
+                <option value="auto" data-i18n="themeAuto">Automatic</option>
+                <option value="light" data-i18n="themeLight">Light</option>
+                <option value="dark" data-i18n="themeDark">Dark</option>
+            </select>
+        </label>
+
+        <p id="siteHint" class="hint hidden" data-i18n="popupSiteHint">This page is not a normal website.</p>
+
+        <button id="optionsBtn" type="button" data-i18n="popupOpenOptions">Advanced options…</button>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>

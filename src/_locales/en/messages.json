@@ -1,0 +1,80 @@
+{
+    "extensionName": {
+        "message": "AutoFurigana"
+    },
+    "extensionDescription": {
+        "message": "Adds furigana above Japanese kanji on web pages. Works fully offline with no data collection or internet requests."
+    },
+    "popupEnabled": {
+        "message": "Enabled"
+    },
+    "popupSiteEnabled": {
+        "message": "Enabled on this site"
+    },
+    "popupSize": {
+        "message": "Size"
+    },
+    "popupSiteHint": {
+        "message": "This page is not a normal website."
+    },
+    "popupOpenOptions": {
+        "message": "Advanced options…"
+    },
+    "optionsTitle": {
+        "message": "AutoFurigana Options"
+    },
+    "optionsTagline": {
+        "message": "Fully offline Japanese furigana for web pages."
+    },
+    "optionsGeneral": {
+        "message": "General"
+    },
+    "optionsEnable": {
+        "message": "Enable the extension"
+    },
+    "optionsFuriganaSize": {
+        "message": "Furigana size"
+    },
+    "optionsLanguage": {
+        "message": "Language"
+    },
+    "optionsLanguageHint": {
+        "message": "Choose the extension's interface language. Automatic follows your browser's language."
+    },
+    "optionsTheme": {
+        "message": "Theme"
+    },
+    "optionsThemeHint": {
+        "message": "Dark mode for the extension's interface. Automatic follows your browser or operating system."
+    },
+    "localeAuto": {
+        "message": "Automatic (browser)"
+    },
+    "themeAuto": {
+        "message": "Automatic"
+    },
+    "themeLight": {
+        "message": "Light"
+    },
+    "themeDark": {
+        "message": "Dark"
+    },
+    "optionsExcludedSites": {
+        "message": "Excluded sites"
+    },
+    "optionsExcludedHint": {
+        "message": "Furigana is not added on these sites. Hostnames only, e.g. example.com."
+    },
+    "optionsAdd": {
+        "message": "Add"
+    },
+    "optionsNoExclusions": {
+        "message": "No exclusions yet."
+    },
+    "optionsPrivacy": {
+        "message": "Privacy"
+    },
+    "optionsPrivacyBody": {
+        "message": "Japanese text is processed locally on your device and is never transmitted by this extension. No network requests, no analytics, no telemetry. Readings are cached in memory only."
+    }
+}

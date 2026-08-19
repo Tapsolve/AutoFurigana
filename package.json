@@ -1,0 +1,42 @@
+{
+  "name": "autofurigana",
+  "version": "1.0.0",
+  "description": "Adds furigana above Japanese kanji on web pages. Works fully offline with no data collection or internet requests.",
+  "private": true,
+  "engines": {
+    "node": ">=20.19"
+  },
+  "scripts": {
+    "build": "node build/build.js",
+    "test": "node test/run-tests.mjs",
+    "test:chromium": "node test/browser-smoke.mjs",
+    "test:firefox": "node test/firefox-selenium-smoke.cjs",
+    "test:browser": "npm run test:chromium && npm run test:firefox",
+    "test:release": "npm test && npm run package && npm run test:browser",
+    "build:firefox": "node build/build.js firefox",
+    "build:chrome": "node build/build.js chrome",
+    "package": "node build/build.js && node build/pack.js",
+    "package:firefox": "node build/build.js firefox && node build/pack.js firefox",
+    "package:chrome": "node build/build.js chrome && node build/pack.js chrome"
+  },
+  "keywords": [
+    "firefox",
+    "chrome",
+    "webextension",
+    "furigana",
+    "japanese",
+    "kuromoji"
+  ],
+  "author": "TapSolve",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "kuromoji": "^0.1.2"
+  },
+  "devDependencies": {
+    "adm-zip": "^0.6.0",
+    "geckodriver": "^6.1.1",
+    "jsdom": "^29.1.1",
+    "playwright": "^1.62.1"
+  }
+}

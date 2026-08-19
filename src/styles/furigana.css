@@ -1,0 +1,13 @@
+/* AutoFurigana - minimal, page-neutral styling.
+ * The base <ruby> text deliberately inherits the page's typography.
+ * Sizes are em-based so furigana stays proportional to surrounding text. */
+
+ruby[data-local-furigana="1"] {
+    ruby-position: over;
+}
+
+ruby[data-local-furigana="1"] > rt {
+    font-size: var(--local-furigana-scale, 0.5em);
+    user-select: none;
+    -webkit-user-select: none;
+}

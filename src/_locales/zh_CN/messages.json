@@ -1,0 +1,80 @@
+{
+    "extensionName": {
+        "message": "AutoFurigana"
+    },
+    "extensionDescription": {
+        "message": "为网页中的日语汉字添加振假名。完全离线运行，不收集数据，也不发送互联网请求。"
+    },
+    "popupEnabled": {
+        "message": "已启用"
+    },
+    "popupSiteEnabled": {
+        "message": "在当前网站启用"
+    },
+    "popupSize": {
+        "message": "大小"
+    },
+    "popupSiteHint": {
+        "message": "此页面不是普通网站。"
+    },
+    "popupOpenOptions": {
+        "message": "高级选项…"
+    },
+    "optionsTitle": {
+        "message": "AutoFurigana 选项"
+    },
+    "optionsTagline": {
+        "message": "完全离线的网页日语振假名。"
+    },
+    "optionsGeneral": {
+        "message": "常规"
+    },
+    "optionsEnable": {
+        "message": "启用扩展程序"
+    },
+    "optionsFuriganaSize": {
+        "message": "振假名大小"
+    },
+    "optionsLanguage": {
+        "message": "语言"
+    },
+    "optionsLanguageHint": {
+        "message": "选择扩展程序的界面语言。自动将跟随您的浏览器语言。"
+    },
+    "optionsTheme": {
+        "message": "主题"
+    },
+    "optionsThemeHint": {
+        "message": "为扩展程序界面启用深色模式。自动将跟随您的浏览器或操作系统。"
+    },
+    "localeAuto": {
+        "message": "自动（浏览器）"
+    },
+    "themeAuto": {
+        "message": "自动"
+    },
+    "themeLight": {
+        "message": "浅色"
+    },
+    "themeDark": {
+        "message": "深色"
+    },
+    "optionsExcludedSites": {
+        "message": "排除的网站"
+    },
+    "optionsExcludedHint": {
+        "message": "不在这些网站添加振假名。仅限主机名，例如 example.com。"
+    },
+    "optionsAdd": {
+        "message": "添加"
+    },
+    "optionsNoExclusions": {
+        "message": "暂无排除项。"
+    },
+    "optionsPrivacy": {
+        "message": "隐私"
+    },
+    "optionsPrivacyBody": {
+        "message": "日语文本在您的设备上本地处理，本扩展程序绝不传输任何内容。无网络请求、无分析、无遥测。读音仅在内存中缓存。"
+    }
+}

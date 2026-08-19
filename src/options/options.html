@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title data-i18n="optionsTitle">AutoFurigana Options</title>
+    <link rel="stylesheet" href="options.css">
+</head>
+<body>
+    <main class="container">
+        <h1>AutoFurigana</h1>
+        <p class="tagline" data-i18n="optionsTagline">Fully offline Japanese furigana for web pages.</p>
+
+        <section class="card">
+            <h2 data-i18n="optionsGeneral">General</h2>
+            <label class="row switch-row">
+                <span data-i18n="optionsEnable">Enable the extension</span>
+                <input type="checkbox" id="enabled">
+            </label>
+        </section>
+
+        <section class="card">
+            <h2 data-i18n="optionsFuriganaSize">Furigana size</h2>
+            <div class="row">
+                <input type="range" id="scale" min="0.1" max="2" step="0.05">
+                <output id="scaleValue"></output>
+            </div>
+            <div class="preview" id="preview">
+                <ruby>日本語<rt>にほんご</rt></ruby>と<ruby>漢字<rt>かんじ</rt></ruby>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 data-i18n="optionsLanguage">Language</h2>
+            <p class="hint" data-i18n="optionsLanguageHint">Choose the extension's interface language. Automatic follows your browser's language.</p>
+            <select id="locale" class="select">
+                <option value="auto" data-i18n="localeAuto">Automatic (browser)</option>
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+                <option value="zh_CN">中文（简体）</option>
+                <option value="ja">日本語</option>
+                <option value="pt">Português</option>
+                <option value="es">Español</option>
+                <option value="nl">Nederlands</option>
+            </select>
+        </section>
+
+        <section class="card">
+            <h2 data-i18n="optionsTheme">Theme</h2>
+            <p class="hint" data-i18n="optionsThemeHint">Dark mode for the extension's interface. Automatic follows your browser or operating system.</p>
+            <select id="theme" class="select">
+                <option value="auto" data-i18n="themeAuto">Automatic</option>
+                <option value="light" data-i18n="themeLight">Light</option>
+                <option value="dark" data-i18n="themeDark">Dark</option>
+            </select>
+        </section>
+
+        <section class="card">
+            <h2 data-i18n="optionsExcludedSites">Excluded sites</h2>
+            <p class="hint" data-i18n="optionsExcludedHint">Furigana is not added on these sites. Hostnames only, e.g. <code>example.com</code>.</p>
+            <form id="addForm" class="row">
+                <input type="text" id="newHost" placeholder="example.com" autocomplete="off" spellcheck="false">
+                <button type="submit" data-i18n="optionsAdd">Add</button>
+            </form>
+            <ul id="hostList" class="host-list"></ul>
+            <p id="hostEmpty" class="hint" data-i18n="optionsNoExclusions">No exclusions yet.</p>
+        </section>
+
+        <section class="card">
+            <h2 data-i18n="optionsPrivacy">Privacy</h2>
+            <p class="hint" data-i18n="optionsPrivacyBody">
+                Japanese text is processed locally on your device and is never transmitted by this extension.
+                No network requests, no analytics, no telemetry. Readings are cached in memory only.
+            </p>
+        </section>
+    </main>
+    <script src="options.js"></script>
+</body>
+</html>
