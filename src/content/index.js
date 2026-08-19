@@ -28,12 +28,19 @@
     var TEXT = 3;
     var ELEMENT = 1;
 
+    // True for the <ruby> elements this extension injected (its own output).
+    function isOurRubyElement(node) {
+        if (!node || node.nodeType !== ELEMENT) return false;
+        return node.getAttribute && node.getAttribute(renderer.DATA_ATTR) === "1";
+    }
+
     // State machine for the content script.
     var state = {
         running: false,
         settings: settings.DEFAULTS,
         enabledOnPage: false,
         processedNodes: new WeakSet(),
+        freshNodes: new WeakSet(),
         cache: F.cache.createLRU(CACHE_SIZE),
         analyzer: null,
         scanner: null,
@@ -187,12 +194,16 @@
 
     function handleChildAdded(node) {
         if (!state.running) return;
-        enqueue(node);
+        // Our own injected ruby is our output, not new page content.
+        if (isOurRubyElement(node)) return;
+        state.freshNodes.add(node);
+        enqueue(node, true);
     }
 
     function handleTextChanged(node) {
         if (!state.running) return;
         if (node.nodeType !== TEXT) return;
+        state.freshNodes.add(node);
         if (renderer.isInsideOurRuby(node)) {
             if (!isInsideRt(node)) {
                 var ruby = node.parentElement.closest(renderer.RUBY_SELECTOR);
@@ -202,11 +213,12 @@
         }
         if (renderer.isInsideAnyRuby(node)) return; // publisher ruby: untouched
         state.processedNodes.delete(node);
-        if (kana.hasKanji(node.nodeValue)) enqueue(node);
+        if (kana.hasKanji(node.nodeValue)) enqueue(node, true);
     }
 
     // Cheap eligibility filter before anything expensive happens.
-    function enqueue(node) {
+    // `fresh` marks MutationObserver discoveries = newly loaded content.
+    function enqueue(node, fresh) {
         if (!state.running) return;
         // Never touch our own injected UI (e.g. the correction popup).
         if (renderer.isInsideIgnored(node)) {
@@ -229,7 +241,7 @@
             if (renderer.isInsideAnyRuby(node)) return;
             if (scannerMod.isInEditable(node)) return;
             if (state.processedNodes.has(node)) return;
-            state.scheduler.enqueue(node);
+            state.scheduler.enqueue(node, fresh);
         } else if (node.nodeType === ELEMENT) {
             if (renderer.isInsideOurRuby(node)) {
                 var rub = node.closest(renderer.RUBY_SELECTOR);
@@ -237,7 +249,7 @@
                 return;
             }
             if (renderer.isInsideAnyRuby(node)) return;
-            state.scheduler.enqueue(node);
+            state.scheduler.enqueue(node, fresh);
         }
     }
 
@@ -256,11 +268,12 @@
     function processNode(node) {
         if (!node || !node.isConnected) return;
         if (node.nodeType === TEXT) {
-            processTextNode(node);
+            processTextNode(node, state.freshNodes.has(node));
             return;
         }
         if (node.nodeType !== ELEMENT) return;
 
+        var fresh = state.freshNodes.has(node);
         var cursor = state.scanCursors.get(node);
         if (!cursor) {
             if (node.shadowRoot) onOpenShadowRoot(node.shadowRoot);
@@ -271,37 +284,58 @@
         var batch = cursor.nextBatch(100);
         for (var i = 0; i < batch.nodes.length; i++) {
             var current = batch.nodes[i];
-            if (current.nodeType === TEXT) processTextNode(current);
+            if (current.nodeType === TEXT) processTextNode(current, fresh);
             else if (current.shadowRoot) onOpenShadowRoot(current.shadowRoot);
         }
         if (batch.done) state.scanCursors.delete(node);
         return batch.done;
     }
 
-    function processTextNode(tn) {
-        if (state.processedNodes.has(tn)) return;
-        if (renderer.isInsideIgnored(tn)) {
-            state.processedNodes.add(tn);
-            return;
-        }
-        var original = tn.nodeValue;
-        if (!kana.hasKanji(original)) {
-            state.processedNodes.add(tn);
-            return;
-        }
-        state.processedNodes.add(tn); // reserve: avoid re-queueing while analyzing
-        var chunks = furigana.splitChunks(original);
-        enqueueAnalysis(tn, original, chunks);
+function isFreshText(tn) {
+    // The walker may visit a freshly-added subtree before the scheduler gets
+    // to that subtree's own cursor. Recognise it here so lazy-loaded text is
+    // prioritised no matter which scan path touches it first.
+    var el = tn.parentElement;
+    var depth = 0;
+    while (el && depth < 12) {
+        if (state.freshNodes.has(el)) return true;
+        el = el.parentElement;
+        depth++;
     }
+    return false;
+}
+
+function processTextNode(tn, fresh) {
+    if (state.processedNodes.has(tn)) return;
+    if (renderer.isInsideIgnored(tn)) {
+        state.processedNodes.add(tn);
+        return;
+    }
+    var original = tn.nodeValue;
+    if (!kana.hasKanji(original)) {
+        state.processedNodes.add(tn);
+        return;
+    }
+    state.processedNodes.add(tn); // reserve: avoid re-queueing while analyzing
+    var chunks = furigana.splitChunks(original);
+    enqueueAnalysis(tn, original, chunks, fresh || isFreshText(tn));
+}
 
     // ---------------------------------------------------------------------
     // Analysis (serialized, one text node at a time)
     // ---------------------------------------------------------------------
 
-    function enqueueAnalysis(node, original, chunks) {
+    function enqueueAnalysis(node, original, chunks, fresh) {
         var run = state.analysisRun;
         if (!run) return;
-        run.queue.push({ node: node, original: original, chunks: chunks });
+        var job = { node: node, original: original, chunks: chunks };
+        if (fresh) {
+            // Newly loaded content must not wait behind an enormous backlog
+            // of earlier text: put it at the front of the queue.
+            run.queue.unshift(job);
+        } else {
+            run.queue.push(job);
+        }
         pumpAnalysis(run);
     }
 
@@ -436,6 +470,7 @@
         if (state.running) return;
         state.running = true;
         state.processedNodes = new WeakSet();
+        state.freshNodes = new WeakSet();
         state.cache = F.cache.createLRU(CACHE_SIZE);
         state.scanCursors = new WeakMap();
         state.shadowRootsSeen = new WeakSet();
@@ -512,6 +547,7 @@
         }
 
         state.processedNodes = new WeakSet();
+        state.freshNodes = new WeakSet();
         state.cache = F.cache.createLRU(CACHE_SIZE);
         state.analyzer = null;
         state.scanner = null;

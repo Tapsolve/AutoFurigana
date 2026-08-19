@@ -1,6 +1,6 @@
 {
   "name": "autofurigana",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Adds furigana above Japanese kanji on web pages. Works fully offline with no data collection or internet requests.",
   "private": true,
   "engines": {

@@ -320,6 +320,59 @@ async function run() {
         })
     );
 
+    // --- Lazy loaded text must not wait behind a huge analysis backlog ---
+    // A live page (infinite scroll, feeds) inserts new text while the initial
+    // scan of a large document is still queued. The new text must be annotated
+    // promptly, not only after every earlier node is finished, and the plain
+    // text must stay intact.
+    await record("lazy-loaded text skips the backlog", () => {
+        const many = [];
+        for (let i = 0; i < 2000; i++) many.push(`<p>遅延文章${i}を分析する。</p>`);
+        const html = many.join("");
+        // A slow tokenizer turns the 2000 paragraphs into a long-running
+        // backlog, mirroring a heavy live page while the browser's real
+        // kuromoji remains fast enough to never stall the queue.
+        return runScenario(html, {
+            tokenizerBuild: (builds, realTokenizer) => ({
+                tokenizer: {
+                    tokenize(text) {
+                        const then = Date.now();
+                        while (Date.now() - then < 4) { /* simulate real cost */ }
+                        return realTokenizer.tokenize(text);
+                    }
+                }
+            })
+        }, async (F, doc) => {
+            await new Promise((r) => setTimeout(r, 250));
+            const fresh = doc.createElement("p");
+            fresh.textContent = "新しい記事のタイトル。";
+            doc.body.appendChild(fresh);
+            const start = Date.now();
+            const ranAt = await waitFor(() => {
+                const rt = fresh.querySelector ? fresh.querySelector("rt") : null;
+                return rt ? rt.textContent : null;
+            }, 8000);
+            const elapsed = Date.now() - start;
+            if (!ranAt) throw new Error("lazy text was never annotated");
+            // Lazy text must be annotated promptly: well before the whole
+            // backlog drains. The slow tokenizer means full drain (all 2000
+            // paragraphs) takes tens of seconds; fresh text reaching the front
+            // of the queue shows up in under a second.
+            if (elapsed > 4000) {
+                throw new Error(`lazy text took ${elapsed}ms to annotate (backlog starvation)`);
+            }
+            if (plainText(doc, fresh) !== "新しい記事のタイトル。") {
+                throw new Error(`plain text corrupted: "${plainText(doc, fresh)}"`);
+            }
+            // The backlog must still be unfinished when fresh text renders:
+            // otherwise lazy text merely waited for everything else first.
+            const drained = countRuby(doc);
+            if (drained >= 5000) {
+                throw new Error(`lazy text waited for the whole backlog (${drained} ruby already rendered)`);
+            }
+        });
+    });
+
     // --- Stop/start while the old tokenizer is still loading ---
     await record("stale analysis cannot cross a stop/start boundary", () => {
         let builds = 0;
