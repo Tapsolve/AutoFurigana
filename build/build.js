@@ -103,6 +103,21 @@ function bundleWithKuromoji(files) {
         path.join(NODE_MODULES, "kuromoji", "build", "kuromoji.js"),
         "utf8"
     );
+    // Kuromoji's Lodash dependency has a dynamic-code fallback for finding the
+    // global object. WebExtensions already provide globalThis, and Firefox
+    // treats the Function constructor like eval, so remove that fallback from
+    // the packaged bundle.
+    let globalFallbacks = 0;
+    kuromojiSrc = kuromojiSrc.replace(
+        /\bFunction\s*\(\s*(['"])return this\1\s*\)\s*\(\s*\)/g,
+        function () {
+            globalFallbacks++;
+            return "globalThis";
+        }
+    );
+    if (globalFallbacks !== 1) {
+        throw new Error(`Expected one Kuromoji dynamic global fallback, found ${globalFallbacks}`);
+    }
     kuromojiSrc = kuromojiSrc.replace(
         /path\.join\(dic_path/g,
         "__furigana_join(dic_path"

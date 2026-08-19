@@ -170,6 +170,13 @@ async function run() {
             }
         });
 
+        await record("kuromoji bundle has no eval / Function constructor", () => {
+            const src = embeddedKuromoji(readFileSync(path.join(dir, "content.js"), "utf8"));
+            const code = stripComments(src);
+            if (/\beval\s*\(/.test(code)) throw new Error("eval() found in Kuromoji bundle");
+            if (/\bFunction\s*\(/.test(code)) throw new Error("Function constructor found in Kuromoji bundle");
+        });
+
         await record("kuromoji bundle's only XHR is the local dict loader", () => {
             const src = embeddedKuromoji(readFileSync(path.join(dir, "content.js"), "utf8"));
             const matches = src.split("XMLHttpRequest").length - 1;
@@ -214,6 +221,18 @@ async function run() {
                 throw new Error("host_permissions should not be needed");
             }
         });
+
+        if (browser === "firefox") {
+            await record("manifest declares no data collection for AMO", () => {
+                const manifest = JSON.parse(readFileSync(path.join(dir, "manifest.json"), "utf8"));
+                const declared = manifest.browser_specific_settings
+                    && manifest.browser_specific_settings.gecko
+                    && manifest.browser_specific_settings.gecko.data_collection_permissions;
+                if (!declared || JSON.stringify(declared.required) !== JSON.stringify(["none"])) {
+                    throw new Error('expected data_collection_permissions.required to be ["none"]');
+                }
+            });
+        }
 
         await record("no extra files that could contain page data", () => {
             const all = walk(dir);
